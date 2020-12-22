@@ -21,7 +21,7 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "scripts": {
-    "build": "rollup -c",
+    "build": "cross-env NODE_ENV=production rollup -c",
     "prepack": "npm run build"
   },
   "peerDependencies": {
@@ -40,6 +40,7 @@
     "@rollup/plugin-commonjs": "^14.0.0",
     "@rollup/plugin-node-resolve": "^8.4.0",
     "@vue/compiler-sfc": "^3.0.0-rc.5",
+    "cross-env": "^7.0.3",
     "rollup": "^2.23.1",
     "rollup-plugin-delete": "^2.0.0",
     "rollup-plugin-peer-deps-external": "^2.2.3",
