@@ -1,0 +1,55 @@
+{
+  "name": "hot",
+  "version": "0.0.0",
+  "description": "Simplistic Handsontable wrapper for Vue",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ssipak/hot.git"
+  },
+  "keywords": [
+    "hot",
+    "vue",
+    "wrapper",
+    "handsontable"
+  ],
+  "author": "Konstantin Krylov",
+  "license": "proprietary",
+  "bugs": {
+    "url": "https://github.com/ssipak/hot/issues"
+  },
+  "homepage": "https://github.com/ssipak/hot#readme",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "scripts": {
+    "build": "rollup -c",
+    "prepack": "npm run build"
+  },
+  "peerDependencies": {
+    "handsontable": "^8.2.0",
+    "vue": "^2.6.11",
+    "vue-class-component": "^7.2.3",
+    "vue-property-decorator": "^8.4.2"
+  },
+  "dependencies": {
+    "handsontable": "^8.2.0",
+    "vue": "^2.6.11",
+    "vue-class-component": "^7.2.3",
+    "vue-property-decorator": "^8.4.2"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^14.0.0",
+    "@rollup/plugin-node-resolve": "^8.4.0",
+    "@vue/compiler-sfc": "^3.0.0-rc.5",
+    "rollup": "^2.23.1",
+    "rollup-plugin-peer-deps-external": "^2.2.3",
+    "rollup-plugin-typescript2": "^0.27.2",
+    "rollup-plugin-vue": "^5.1.6",
+    "tslib": "^2.0.3",
+    "typescript": "^3.9.7",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "files": [
+    "dist",
+    "readme.md"
+  ]
+}
