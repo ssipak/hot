@@ -14,6 +14,8 @@ export default class Hot<T, K extends keyof T> extends Vue {
     value: Value;
     dataSchema: RowObject | undefined;
     readOnly: boolean;
+    emptyCol: boolean;
+    stretchLast: boolean;
     readonly hot: HTMLElement;
     mounted(): void;
     beforeDestroy(): void;

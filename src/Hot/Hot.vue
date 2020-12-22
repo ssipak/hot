@@ -32,6 +32,8 @@ export default class Hot<T, K extends keyof T> extends Vue {
   @Prop({ type: Array, default: () => [] }) value!: Value
   @Prop({ type: Object }) dataSchema: RowObject | undefined
   @Prop({ type: Boolean, default: false }) readOnly!: boolean
+  @Prop({ type: Boolean, default: false }) emptyCol!: boolean
+  @Prop({ type: Boolean, default: true }) stretchLast!: boolean
 
   @Ref() readonly hot!: HTMLElement
 
@@ -73,7 +75,9 @@ export default class Hot<T, K extends keyof T> extends Vue {
       columns = columns.map(col => ({ editor: false, ...col }))
     }
 
-    columns.push({ data: '', title: ' ', readOnly: true })
+    if (this.emptyCol) {
+      columns.push({ data: '', title: ' ', readOnly: true })
+    }
 
     const config: GridSettings = {
       columns,
@@ -81,7 +85,7 @@ export default class Hot<T, K extends keyof T> extends Vue {
       autoColumnSize: true,
       manualColumnResize: true,
       autoWrapRow: true,
-      stretchH: 'last',
+      stretchH: this.stretchLast ? 'last' : 'all',
       licenseKey: this.licenseKey,
       preventOverflow: 'vertical',
     }
@@ -114,11 +118,12 @@ export default class Hot<T, K extends keyof T> extends Vue {
     const parentEl = this.hot.parentElement
 
     if (parentEl) {
-      const computedHeight = window.getComputedStyle(parentEl).height
-      const height = parseFloat(computedHeight.replace(/px$/, ''));
+      let { height, paddingTop, paddingBottom } = window.getComputedStyle(parentEl)
+      const computedHeight = parseFloat(height) - parseFloat(paddingTop) - parseFloat(paddingBottom)
+
       const { instance } = this
 
-      instance.updateSettings({ height })
+      instance.updateSettings({ height: computedHeight })
       instance.render()
     }
   }
@@ -177,23 +182,26 @@ export default class Hot<T, K extends keyof T> extends Vue {
 
 </script>
 
-<style lang="stylus">
-.handsontable th
-  text-align: left
-  color: $grey-10
-  letter-spacing: 0.8px
-  text-transform: uppercase
-  font-size: 10px
+<style lang="stylus" scoped>
+.handsontable::v-deep
+  th
+    text-align: left
+    color: var(--hot-header-color)
+    background: var(--hot-header-bg)
+    letter-spacing: 0.8px
+    text-transform: uppercase
+    font-size: 11px
+    font-weight bold
 
-.handsontable th,
-.handsontable td
-  height: 30px
-  line-height: 29px
-  padding: 2px 6px
-  border-color: $grey-3 !important
+  th,
+  td
+    height: 29px !important
+    line-height: 30px
+    padding: 2px 6px
+    border-color: var(--hot-border-color) !important
 
-.handsontable thead th .relative
-  padding: 2px 6px
+  thead th .relative
+    padding: 2px 6px
 
 .handsontableInput
   line-height: 30px
