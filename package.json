@@ -22,7 +22,7 @@
   "module": "dist/index.esm.js",
   "scripts": {
     "build": "cross-env NODE_ENV=production rollup -c",
-    "prepack": "npm run build"
+    "build-n-pack": "npm run build && npm pack"
   },
   "peerDependencies": {
     "handsontable": "^8.2.0",
