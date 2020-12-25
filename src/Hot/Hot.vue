@@ -118,12 +118,16 @@ export default class Hot<T, K extends keyof T> extends Vue {
     const parentEl = this.hot.parentElement
 
     if (parentEl) {
-      let { height, paddingTop, paddingBottom } = window.getComputedStyle(parentEl)
-      const computedHeight = parseFloat(height) - parseFloat(paddingTop) - parseFloat(paddingBottom)
+      let { height, paddingTop, paddingBottom, boxSizing } = window.getComputedStyle(parentEl)
+
+      let contentHeight = parseFloat(height)
+      if (boxSizing === 'border-box') {
+        contentHeight -= parseFloat(paddingTop) + parseFloat(paddingBottom)
+      }
 
       const { instance } = this
 
-      instance.updateSettings({ height: computedHeight })
+      instance.updateSettings({ height: contentHeight })
       instance.render()
     }
   }
