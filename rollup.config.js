@@ -5,6 +5,7 @@ import typescript from "rollup-plugin-typescript2";
 import vue from "rollup-plugin-vue";
 import del from "rollup-plugin-delete";
 import alias from "@rollup/plugin-alias";
+import { terser } from 'rollup-plugin-terser';
 
 import packageJson from "./package.json";
 import path from "path";
@@ -33,5 +34,6 @@ export default {
     commonjs(),
     typescript(),
     vue(),
+    terser(),
   ]
 };
