@@ -11,7 +11,7 @@ import RowObject = Handsontable.RowObject
 import ColumnSettings = Handsontable.ColumnSettings
 import CellChange = Handsontable.CellChange
 import ChangeSource = Handsontable.ChangeSource
-import {range, debounce, deepCopy, deepEqual} from '../utils'
+import {range, debounce, deepCopy, deepEqual} from '@/utils'
 
 type WrapFn = () => void
 type Value = CellValue[][] | RowObject[]

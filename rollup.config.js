@@ -4,8 +4,10 @@ import commonjs from "@rollup/plugin-commonjs";
 import typescript from "rollup-plugin-typescript2";
 import vue from "rollup-plugin-vue";
 import del from "rollup-plugin-delete";
+import alias from "@rollup/plugin-alias";
 
 import packageJson from "./package.json";
+import path from "path";
 
 export default {
   input: "src/index.ts",
@@ -23,6 +25,11 @@ export default {
     del({ targets: 'dist/*'}),
     peerDepsExternal(),
     resolve(),
+    alias({
+      entries: {
+        '@': path.resolve(__dirname, 'src'),
+      },
+    }),
     commonjs(),
     typescript(),
     vue(),

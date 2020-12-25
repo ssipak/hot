@@ -167,7 +167,7 @@ let Hot = class Hot extends Vue {
         const parentEl = this.hot.parentElement;
         if (parentEl) {
             let { height, paddingTop, paddingBottom } = window.getComputedStyle(parentEl);
-            const computedHeight = parseFloat(height) - parseFloat(paddingTop) - parseFloat(paddingBottom);
+            const computedHeight = parseFloat(height); // - parseFloat(paddingTop) - parseFloat(paddingBottom)
             const { instance } = this;
             instance.updateSettings({ height: computedHeight });
             instance.render();
@@ -383,11 +383,11 @@ var __vue_staticRenderFns__ = [];
   /* style */
   const __vue_inject_styles__ = function (inject) {
     if (!inject) return
-    inject("data-v-044db90e_0", { source: ".handsontable[data-v-044db90e] th{text-align:left;color:var(--hot-header-color);background:var(--hot-header-bg);letter-spacing:.8px;text-transform:uppercase;font-size:11px;font-weight:700}.handsontable[data-v-044db90e] td,.handsontable[data-v-044db90e] th{height:29px!important;line-height:30px;padding:2px 6px;border-color:var(--hot-border-color)!important}.handsontable[data-v-044db90e] thead th .relative{padding:2px 6px}.handsontableInput[data-v-044db90e]{line-height:30px;font-size:14px}", map: undefined, media: undefined });
+    inject("data-v-7221c5ad_0", { source: ".handsontable[data-v-7221c5ad] th{text-align:left;color:var(--hot-header-color);background:var(--hot-header-bg);letter-spacing:.8px;text-transform:uppercase;font-size:11px;font-weight:700}.handsontable[data-v-7221c5ad] td,.handsontable[data-v-7221c5ad] th{height:29px!important;line-height:30px;padding:2px 6px;border-color:var(--hot-border-color)!important}.handsontable[data-v-7221c5ad] thead th .relative{padding:2px 6px}.handsontableInput[data-v-7221c5ad]{line-height:30px;font-size:14px}", map: undefined, media: undefined });
 
   };
   /* scoped */
-  const __vue_scope_id__ = "data-v-044db90e";
+  const __vue_scope_id__ = "data-v-7221c5ad";
   /* module identifier */
   const __vue_module_identifier__ = undefined;
   /* functional template */
