@@ -6,9 +6,12 @@ import vue from "rollup-plugin-vue";
 import del from "rollup-plugin-delete";
 import alias from "@rollup/plugin-alias";
 import { terser } from 'rollup-plugin-terser';
+import visualizer from 'rollup-plugin-visualizer';
 
 import packageJson from "./package.json";
 import path from "path";
+
+const useVis = process.env.VISUALIZE ==='yes'
 
 export default {
   input: "src/index.ts",
@@ -21,7 +24,10 @@ export default {
       format: "esm",
       file: packageJson.module,
     }
-  ],
+  ].map(output => ({
+    ...output,
+    sourcemap: useVis,
+  })),
   plugins: [
     del({ targets: 'dist/*'}),
     peerDepsExternal(),
@@ -35,5 +41,11 @@ export default {
     typescript(),
     vue(),
     terser(),
+    useVis && visualizer({
+      open: true,
+      filename: 'dist/stats.html',
+      sourcemap: true,
+      gzipSize: true,
+    }),
   ]
 };

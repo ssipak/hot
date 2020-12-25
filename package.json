@@ -23,6 +23,7 @@
   "scripts": {
     "serve": "vue-cli-service serve dev/serve.ts",
     "build": "cross-env NODE_ENV=production rollup -c",
+    "build:dev": "cross-env NODE_ENV=production VISUALIZE=yes rollup -c",
     "build-n-pack": "npm run build && npm pack"
   },
   "peerDependencies": {
@@ -45,6 +46,7 @@
     "rollup-plugin-peer-deps-external": "^2.2.3",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.27.2",
+    "rollup-plugin-visualizer": "^4.2.0",
     "rollup-plugin-vue": "^5.1.6",
     "stylus": "^0.54.8",
     "stylus-loader": "^3.0.2",
