@@ -21,7 +21,7 @@
 
 <script lang="ts">
 import {Component, Ref, Vue, Watch} from "vue-property-decorator";
-import Hot from '../src/Hot/Hot'
+import Hot from '../src/components/Hot'
 import {dataFaker} from "./lib/data-faker";
 import {take} from "./lib/take";
 

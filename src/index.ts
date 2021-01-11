@@ -1,3 +1,3 @@
-import Hot from "@/Hot/Hot.vue";
+import Hot from "@/components/Hot.vue";
 
 export { Hot };

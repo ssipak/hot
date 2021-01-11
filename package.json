@@ -54,12 +54,15 @@
     "typescript": "^3.9.7",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
+    "vue-docgen-web-types": "^0.1.7",
     "vue-property-decorator": "^8.4.2",
     "vue-template-compiler": "^2.6.11"
   },
+  "web-types": "./web-types.json",
   "files": [
     "dist",
     "src",
-    "readme.md"
+    "readme.md",
+    "web-types.json"
   ]
 }
