@@ -13,15 +13,9 @@
       "es2019",
       "dom"
     ],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    }
   },
   "exclude": ["dist", "node_modules"],
   "include": [
     "src/**/*.ts", "src/**/*.vue",
-  ]
+  ],
 }

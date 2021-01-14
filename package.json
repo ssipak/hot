@@ -24,7 +24,8 @@
     "serve": "vue-cli-service serve dev/serve.ts",
     "build": "cross-env NODE_ENV=production rollup -c",
     "build:dev": "cross-env NODE_ENV=production VISUALIZE=yes rollup -c",
-    "build-n-pack": "npm run build && npm pack"
+    "build-n-pack": "npm run build && npm pack",
+    "web-types": "vue-docgen-web-types"
   },
   "peerDependencies": {
     "handsontable": "^8.2.0",
@@ -58,11 +59,10 @@
     "vue-property-decorator": "^8.4.2",
     "vue-template-compiler": "^2.6.11"
   },
-  "web-types": "./web-types.json",
+  "web-types": "dist/web-types.json",
   "files": [
     "dist",
     "src",
-    "readme.md",
-    "web-types.json"
+    "readme.md"
   ]
 }
