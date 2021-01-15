@@ -62,7 +62,6 @@
   "web-types": "web-types.json",
   "files": [
     "dist",
-    "src",
     "readme.md",
     "web-types.json"
   ]
