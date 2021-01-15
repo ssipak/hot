@@ -25,7 +25,7 @@ const resizeObserver = new ResizeObserver(wraps =>
 
 const FILLIN = 'fillIn'
 
-@Component
+@Component({name: 'Hot'})
 export default class Hot<T, K extends keyof T> extends Vue {
   @Prop({ type: String, required: true }) public licenseKey!: string
   @Prop({ type: Array, required: true }) public columns!: ColumnSettings[]
