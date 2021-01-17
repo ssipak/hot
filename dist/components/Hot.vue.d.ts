@@ -1,5 +1,5 @@
-import { Vue } from 'vue-property-decorator';
-import Handsontable from 'handsontable';
+import { Vue } from "vue-property-decorator";
+import Handsontable from "handsontable";
 import GridSettings = Handsontable.GridSettings;
 import CellValue = Handsontable.CellValue;
 import RowObject = Handsontable.RowObject;

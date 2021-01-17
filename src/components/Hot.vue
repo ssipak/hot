@@ -3,80 +3,78 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator'
-import Handsontable from 'handsontable'
-import GridSettings = Handsontable.GridSettings
-import CellValue = Handsontable.CellValue
-import RowObject = Handsontable.RowObject
-import ColumnSettings = Handsontable.ColumnSettings
-import CellChange = Handsontable.CellChange
-import ChangeSource = Handsontable.ChangeSource
-import {range, debounce, deepCopy, deepEqual} from '../utils'
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
+import Handsontable from 'handsontable';
+import { range, debounce, deepCopy, deepEqual } from '@/utils';
+import GridSettings = Handsontable.GridSettings;
+import CellValue = Handsontable.CellValue;
+import RowObject = Handsontable.RowObject;
+import ColumnSettings = Handsontable.ColumnSettings;
+import CellChange = Handsontable.CellChange;
+import ChangeSource = Handsontable.ChangeSource;
 
-type WrapFn = () => void
-type Value = CellValue[][] | RowObject[]
+type WrapFn = () => void;
+type Value = CellValue[][] | RowObject[];
 
-const instances = new WeakMap<Vue, Handsontable>()
-const renderers = new WeakMap<Element, WrapFn>()
+const instances = new WeakMap<Vue, Handsontable>();
+const renderers = new WeakMap<Element, WrapFn>();
 
 const resizeObserver = new ResizeObserver(wraps =>
   wraps.forEach(({ target }) => renderers.get(target)?.())
-)
+);
 
-const FILLIN = 'fillIn'
+const FILLIN = 'fillIn';
 
-@Component({name: 'Hot'})
+@Component({ name: 'Hot' })
 export default class Hot<T, K extends keyof T> extends Vue {
-  @Prop({ type: String, required: true }) public licenseKey!: string
-  @Prop({ type: Array, required: true }) public columns!: ColumnSettings[]
-  @Prop({ type: Array, default: () => [] }) value!: Value
-  @Prop({ type: Object }) dataSchema: RowObject | undefined
-  @Prop({ type: Boolean, default: false }) readOnly!: boolean
-  @Prop({ type: Boolean, default: false }) emptyCol!: boolean
-  @Prop({ type: Boolean, default: true }) stretchLast!: boolean
+  @Prop({ type: String, required: true }) public licenseKey!: string;
+  @Prop({ type: Array, required: true }) public columns!: ColumnSettings[];
+  @Prop({ type: Array, default: () => [] }) value!: Value;
+  @Prop({ type: Object }) dataSchema: RowObject | undefined;
+  @Prop({ type: Boolean, default: false }) readOnly!: boolean;
+  @Prop({ type: Boolean, default: false }) emptyCol!: boolean;
+  @Prop({ type: Boolean, default: true }) stretchLast!: boolean;
 
-  @Ref() readonly hot!: HTMLElement
+  @Ref() readonly hot!: HTMLElement;
 
-  mounted () {
-    const instance = new Handsontable(this.hot, this.staticConfig)
-    const parentEl = this.hot.parentElement
+  mounted (): void {
+    const instance = new Handsontable(this.hot, this.staticConfig);
+    const parentEl = this.hot.parentElement;
 
-    instances.set(this, instance)
+    instances.set(this, instance);
     if (parentEl) {
-      renderers.set(
-        parentEl,
-        debounce(this.hackyRender.bind(this), 100)
-      )
-      resizeObserver.observe(parentEl)
+      renderers.set(parentEl, debounce(this.hackyRender.bind(this), 100));
+      resizeObserver.observe(parentEl);
     }
 
-    instance.addHook('afterChange', this.change.bind(this))
-    instance.loadData(deepCopy(this.value))
-    instance.validateRows([...range(0, this.value.length)])
+    instance.addHook('afterChange', this.change.bind(this));
+    instance.loadData(deepCopy(this.value));
+    instance.validateRows([...range(0, this.value.length)]);
   }
 
-  beforeDestroy () {
-    instances.delete(this)
-    const parentEl = this.hot.parentElement
+  // noinspection JSUnusedGlobalSymbols
+  beforeDestroy (): void {
+    instances.delete(this);
+    const parentEl = this.hot.parentElement;
     if (parentEl) {
-      renderers.delete(parentEl)
-      resizeObserver.unobserve(parentEl)
+      renderers.delete(parentEl);
+      resizeObserver.unobserve(parentEl);
     }
   }
 
   get instance (): Handsontable {
-    return instances.get(this) as Handsontable
+    return instances.get(this) as Handsontable;
   }
 
   get staticConfig (): GridSettings {
-    let { columns } = this
+    let { columns } = this;
 
     if (this.readOnly) {
-      columns = columns.map(col => ({ editor: false, ...col }))
+      columns = columns.map(col => ({ editor: false, ...col }));
     }
 
     if (this.emptyCol) {
-      columns.push({ data: '', title: ' ', readOnly: true })
+      columns.push({ data: '', title: ' ', readOnly: true });
     }
 
     const config: GridSettings = {
@@ -87,103 +85,105 @@ export default class Hot<T, K extends keyof T> extends Vue {
       autoWrapRow: true,
       stretchH: this.stretchLast ? 'last' : 'all',
       licenseKey: this.licenseKey,
-      preventOverflow: 'vertical',
-    }
+      preventOverflow: 'vertical'
+    };
 
     if (this.readOnly) {
-      config.beforePaste = () => false
+      config.beforePaste = () => false;
     }
 
-    return config
+    return config;
   }
 
-  public requestRender() {
-    const parentEl = this.hot.parentElement
+  public requestRender (): void {
+    const parentEl = this.hot.parentElement;
 
     if (parentEl) {
-      renderers.get(parentEl)?.()
+      renderers.get(parentEl)?.();
     }
   }
 
-  private hackyRender() {
-    const {instance} = this
+  private hackyRender (): void {
+    const { instance } = this;
 
-    instance.updateSettings({ height: 'auto' })
-    instance.render()
+    instance.updateSettings({ height: 'auto' });
+    instance.render();
 
-    this.hackyRenderSecondRun()
+    this.hackyRenderSecondRun();
   }
 
-  private hackyRenderSecondRun() {
-    const parentEl = this.hot.parentElement
+  private hackyRenderSecondRun (): void {
+    const parentEl = this.hot.parentElement;
 
     if (parentEl) {
-      let { height, paddingTop, paddingBottom, boxSizing } = window.getComputedStyle(parentEl)
+      const {
+        height,
+        paddingTop,
+        paddingBottom,
+        boxSizing
+      } = window.getComputedStyle(parentEl);
 
-      let contentHeight = parseFloat(height)
+      let contentHeight = parseFloat(height);
       if (boxSizing === 'border-box') {
-        contentHeight -= parseFloat(paddingTop) + parseFloat(paddingBottom)
+        contentHeight -= parseFloat(paddingTop) + parseFloat(paddingBottom);
       }
 
-      const { instance } = this
+      const { instance } = this;
 
-      instance.updateSettings({ height: contentHeight })
-      instance.render()
+      instance.updateSettings({ height: contentHeight });
+      instance.render();
     }
   }
 
-  change (changes: CellChange[] | null, source: ChangeSource | typeof FILLIN) {
-    const { instance } = this
+  change (changes: CellChange[] | null, source: ChangeSource | typeof FILLIN): void {
+    const { instance } = this;
 
-    const sourceData = instance.getSourceData()
+    const sourceData = instance.getSourceData();
 
     if (!deepEqual(sourceData, this.value)) {
-      this.$emit('input', sourceData)
+      this.$emit('input', sourceData);
     }
 
     if (source === FILLIN || changes === null) {
-      return
+      return;
     }
 
     this.$emit(
       'change',
-      changes.map(
-        ([row, prop, oldVal, newVal]) => [
-          instance.toPhysicalRow(row),
-          prop,
-          oldVal as unknown,
-          newVal as unknown
-        ]
-      )
-    )
+      changes.map(([row, prop, oldVal, newVal]) => [
+        instance.toPhysicalRow(row),
+        prop,
+        oldVal as unknown,
+        newVal as unknown
+      ])
+    );
   }
 
-  @Watch('value') watchValue (value: Value) {
-    const { instance } = this
-    instance.updateSettings({ height: 'auto' })
-    instance.loadData(deepCopy(value))
-    instance.validateRows([...range(0, value.length)])
-    this.hackyRenderSecondRun()
+  @Watch('value') watchValue (value: Value): void {
+    const { instance } = this;
+    instance.updateSettings({ height: 'auto' });
+    instance.loadData(deepCopy(value));
+    instance.validateRows([...range(0, value.length)]);
+    this.hackyRenderSecondRun();
   }
 
-  @Watch('staticConfig') watchConfig (config: GridSettings) {
-    this.instance.updateSettings(config)
+  @Watch('staticConfig') watchConfig (config: GridSettings): void {
+    this.instance.updateSettings(config);
   }
 
-  fillIn (data: Map<number, Map<K, T[K]>>) {
-    const { instance } = this
+  fillIn (data: Map<number, Map<K, T[K]>>): void {
+    const { instance } = this;
 
-    const changes: [number, string, unknown][] = []
+    const changes: [number, string, unknown][] = [];
     for (const [row, props] of data) {
       for (const [prop, val] of props) {
-        changes.push([instance.toVisualRow(row), prop as string, val])
+        changes.push([instance.toVisualRow(row), prop as string, val]);
       }
     }
 
-    instance.setDataAtRowProp(changes, FILLIN)
+    instance.setDataAtRowProp(changes, FILLIN);
   }
 }
-
 </script>
 
 <style lang="stylus" scoped>

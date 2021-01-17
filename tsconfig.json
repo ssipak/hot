@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
+    "declaration": true,
     "declarationDir": "dist",
     "target": "es2015",
     "module": "es2015",
     "moduleResolution": "node",
     "sourceMap": true,
-    "declaration": true,
     "importHelpers": true,
     "strict": true,
     "experimentalDecorators": true,
@@ -13,9 +13,19 @@
       "es2019",
       "dom"
     ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
   },
-  "exclude": ["dist", "node_modules"],
-  "include": [
-    "src/**/*.ts", "src/**/*.vue",
+  "exclude": [
+    "dist",
+    "node_modules"
   ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue"
+  ]
 }

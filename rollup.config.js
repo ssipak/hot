@@ -1,44 +1,53 @@
-import peerDepsExternal from "rollup-plugin-peer-deps-external";
-import resolve from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
-import tsPlugin from "rollup-plugin-typescript2";
-import vue from "rollup-plugin-vue";
-import del from "rollup-plugin-delete";
+import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import resolvePlugin from '@rollup/plugin-node-resolve';
+import alias from '@rollup/plugin-alias';
+import commonjs from '@rollup/plugin-commonjs';
+import tsPlugin from 'rollup-plugin-typescript2';
+import vue from 'rollup-plugin-vue';
+import del from 'rollup-plugin-delete';
 import { terser } from 'rollup-plugin-terser';
 import visualizer from 'rollup-plugin-visualizer';
 
-import packageJson from "./package.json";
+import packageJson from './package.json';
+import { resolve as resolvePath } from 'path';
+import { fixDtsImportsPlugin } from './build/fixDtsImportsPlugin';
 
-const useVis = process.env.VISUALIZE ==='yes'
+const useVis = process.env.VISUALIZE === 'yes';
 
 export default {
-  input: "src/index.ts",
+  input: 'src/index.ts',
   output: [
     {
-      format: "cjs",
-      file: packageJson.main,
+      format: 'cjs',
+      file: packageJson.main
     },
     {
-      format: "esm",
-      file: packageJson.module,
+      format: 'esm',
+      file: packageJson.module
     }
   ].map(output => ({
     ...output,
-    sourcemap: useVis,
+    sourcemap: useVis
   })),
   plugins: [
-    del({ targets: 'dist/*'}),
+    del({ targets: 'dist/*' }),
     peerDepsExternal(),
-    resolve(),
+    alias({
+      entries: { '@': resolvePath(__dirname, 'src') }
+    }),
+    resolvePlugin(),
     commonjs(),
-    tsPlugin(),
+    tsPlugin({
+      useTsconfigDeclarationDir: false
+    }),
     vue(),
+    fixDtsImportsPlugin({ '@': '.' }),
     terser(),
     useVis && visualizer({
       open: true,
       filename: 'dist/stats.html',
       sourcemap: true,
-      gzipSize: true,
-    }),
+      gzipSize: true
+    })
   ]
 };
