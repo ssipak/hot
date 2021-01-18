@@ -7,10 +7,10 @@ import vue from 'rollup-plugin-vue';
 import del from 'rollup-plugin-delete';
 import { terser } from 'rollup-plugin-terser';
 import visualizer from 'rollup-plugin-visualizer';
+import { dtsImportsPlugin } from 'rollup-plugin-dts-imports';
 
 import packageJson from './package.json';
 import { resolve as resolvePath } from 'path';
-import { fixDtsImportsPlugin } from './build/fixDtsImportsPlugin';
 
 const useVis = process.env.VISUALIZE === 'yes';
 
@@ -41,7 +41,7 @@ export default {
       useTsconfigDeclarationDir: false
     }),
     vue(),
-    fixDtsImportsPlugin({ '@': '.' }),
+    dtsImportsPlugin(),
     terser(),
     useVis && visualizer({
       open: true,
