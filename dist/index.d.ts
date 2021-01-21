@@ -1,2 +1,1 @@
-import Hot from "./components/Hot.vue";
-export { Hot };
+export { default as Hot } from "./components/Hot.vue";

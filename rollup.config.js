@@ -37,10 +37,8 @@ export default {
     }),
     resolvePlugin(),
     commonjs(),
-    tsPlugin({
-      useTsconfigDeclarationDir: false
-    }),
     vue(),
+    tsPlugin(),
     dtsImportsPlugin(),
     terser(),
     useVis && visualizer({
