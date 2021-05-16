@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
+import Vue, { PropType } from 'vue';
 import Handsontable from 'handsontable';
 import { range, debounce, deepCopy, deepEqual } from '@/utils';
 import GridSettings = Handsontable.GridSettings;
@@ -25,21 +25,162 @@ const resizeObserver = new ResizeObserver(wraps =>
 
 const FILLIN = 'fillIn';
 
-@Component({ name: 'Hot' })
-export default class Hot<T, K extends keyof T> extends Vue {
-  @Prop({ type: String, required: true }) public licenseKey!: string;
-  @Prop({ type: Array, required: true }) public columns!: ColumnSettings[];
-  @Prop({ type: Array, default: () => [] }) value!: Value;
-  @Prop({ type: Object }) dataSchema: RowObject | undefined;
-  @Prop({ type: Boolean, default: false }) readOnly!: boolean;
-  @Prop({ type: Boolean, default: false }) emptyCol!: boolean;
-  @Prop({ type: Boolean, default: true }) stretchLast!: boolean;
+export default Vue.extend({
+  name: 'Hot',
 
-  @Ref() readonly hot!: HTMLElement;
+  props: {
+    licenseKey: { type: String, required: true },
+    columns: { type: Array as PropType<ColumnSettings[]>, required: true },
+    value: { type: Array as PropType<Value>, default: () => [] },
+    dataSchema: { type: Object as PropType<RowObject | undefined> },
+    readOnly: { type: Boolean, default: false },
+    emptyCol: { type: Boolean, default: false },
+    stretchLast: { type: Boolean, default: true }
+  },
+
+  computed: {
+    staticConfig (): GridSettings {
+      let { columns } = this;
+
+      if (this.readOnly) {
+        columns = columns.map(col => ({ editor: false, ...col }));
+      }
+
+      if (this.emptyCol) {
+        columns.push({ data: '', title: ' ', readOnly: true });
+      }
+
+      const config: GridSettings = {
+        columns,
+        dataSchema: this.dataSchema,
+        autoColumnSize: true,
+        manualColumnResize: true,
+        autoWrapRow: true,
+        stretchH: this.stretchLast ? 'last' : 'all',
+        licenseKey: this.licenseKey,
+        preventOverflow: 'vertical'
+      };
+
+      if (this.readOnly) {
+        config.beforePaste = () => false;
+      }
+
+      return config;
+    }
+  },
+
+  watch: {
+    value (value: Value): void {
+      const instance = this.instance();
+      instance.updateSettings({ height: 'auto' });
+      instance.loadData(deepCopy(value));
+      instance.validateRows([...range(0, value.length)]);
+      this.hackyRenderSecondRun();
+    },
+
+    staticConfig (config: GridSettings): void {
+      this.instance().updateSettings(config);
+    }
+  },
+
+  methods: {
+    instance (): Handsontable {
+      return instances.get(this) as Handsontable;
+    },
+
+    hot (): HTMLElement {
+      const hot = this.$refs.hot;
+
+      if (!(hot instanceof HTMLElement)) {
+        throw new Error('No template reference is available');
+      }
+
+      return hot;
+    },
+
+    requestRender (): void {
+      const parentEl = this.hot()?.parentElement;
+
+      if (parentEl) {
+        renderers.get(parentEl)?.();
+      }
+    },
+
+    hackyRender (): void {
+      const instance = this.instance();
+
+      instance.updateSettings({ height: 'auto' });
+      instance.render();
+
+      this.hackyRenderSecondRun();
+    },
+
+    hackyRenderSecondRun (): void {
+      const parentEl = this.hot()?.parentElement;
+
+      if (parentEl) {
+        const {
+          height,
+          paddingTop,
+          paddingBottom,
+          boxSizing
+        } = window.getComputedStyle(parentEl);
+
+        let contentHeight = parseFloat(height);
+        if (boxSizing === 'border-box') {
+          contentHeight -= parseFloat(paddingTop) + parseFloat(paddingBottom);
+        }
+
+        const instance = this.instance();
+
+        instance.updateSettings({ height: contentHeight });
+        instance.render();
+      }
+    },
+
+    change (changes: CellChange[] | null, source: ChangeSource | typeof FILLIN): void {
+      const instance = this.instance();
+
+      const sourceData = instance.getSourceData();
+
+      if (!deepEqual(sourceData, this.value)) {
+        this.$emit('input', sourceData);
+      }
+
+      if (source === FILLIN || changes === null) {
+        return;
+      }
+
+      this.$emit(
+        'change',
+        changes.map(([row, prop, oldVal, newVal]) => [
+          instance.toPhysicalRow(row),
+          prop,
+          oldVal as unknown,
+          newVal as unknown
+        ])
+      );
+    },
+
+    fillIn<K extends string, V> (data: Map<number, Map<K, V>>): void {
+      const instance = this.instance();
+
+      const changes: [number, string, unknown][] = [];
+      for (const [row, props] of data) {
+        for (const [prop, val] of props) {
+          changes.push([instance.toVisualRow(row), prop as string, val]);
+        }
+      }
+
+      instance.setDataAtRowProp(changes, FILLIN);
+    }
+  },
 
   mounted (): void {
-    const instance = new Handsontable(this.hot, this.staticConfig);
-    const parentEl = this.hot.parentElement;
+    const hot = this.hot();
+
+    const instance = new Handsontable(hot, this.staticConfig);
+    const parentEl = this.hot()?.parentElement;
 
     instances.set(this, instance);
     if (parentEl) {
@@ -50,140 +191,18 @@ export default class Hot<T, K extends keyof T> extends Vue {
     instance.addHook('afterChange', this.change.bind(this));
     instance.loadData(deepCopy(this.value));
     instance.validateRows([...range(0, this.value.length)]);
-  }
+  },
 
   // noinspection JSUnusedGlobalSymbols
   beforeDestroy (): void {
     instances.delete(this);
-    const parentEl = this.hot.parentElement;
+    const parentEl = this.hot()?.parentElement;
     if (parentEl) {
       renderers.delete(parentEl);
       resizeObserver.unobserve(parentEl);
     }
   }
-
-  get instance (): Handsontable {
-    return instances.get(this) as Handsontable;
-  }
-
-  get staticConfig (): GridSettings {
-    let { columns } = this;
-
-    if (this.readOnly) {
-      columns = columns.map(col => ({ editor: false, ...col }));
-    }
-
-    if (this.emptyCol) {
-      columns.push({ data: '', title: ' ', readOnly: true });
-    }
-
-    const config: GridSettings = {
-      columns,
-      dataSchema: this.dataSchema,
-      autoColumnSize: true,
-      manualColumnResize: true,
-      autoWrapRow: true,
-      stretchH: this.stretchLast ? 'last' : 'all',
-      licenseKey: this.licenseKey,
-      preventOverflow: 'vertical'
-    };
-
-    if (this.readOnly) {
-      config.beforePaste = () => false;
-    }
-
-    return config;
-  }
-
-  public requestRender (): void {
-    const parentEl = this.hot.parentElement;
-
-    if (parentEl) {
-      renderers.get(parentEl)?.();
-    }
-  }
-
-  private hackyRender (): void {
-    const { instance } = this;
-
-    instance.updateSettings({ height: 'auto' });
-    instance.render();
-
-    this.hackyRenderSecondRun();
-  }
-
-  private hackyRenderSecondRun (): void {
-    const parentEl = this.hot.parentElement;
-
-    if (parentEl) {
-      const {
-        height,
-        paddingTop,
-        paddingBottom,
-        boxSizing
-      } = window.getComputedStyle(parentEl);
-
-      let contentHeight = parseFloat(height);
-      if (boxSizing === 'border-box') {
-        contentHeight -= parseFloat(paddingTop) + parseFloat(paddingBottom);
-      }
-
-      const { instance } = this;
-
-      instance.updateSettings({ height: contentHeight });
-      instance.render();
-    }
-  }
-
-  change (changes: CellChange[] | null, source: ChangeSource | typeof FILLIN): void {
-    const { instance } = this;
-
-    const sourceData = instance.getSourceData();
-
-    if (!deepEqual(sourceData, this.value)) {
-      this.$emit('input', sourceData);
-    }
-
-    if (source === FILLIN || changes === null) {
-      return;
-    }
-
-    this.$emit(
-      'change',
-      changes.map(([row, prop, oldVal, newVal]) => [
-        instance.toPhysicalRow(row),
-        prop,
-        oldVal as unknown,
-        newVal as unknown
-      ])
-    );
-  }
-
-  @Watch('value') watchValue (value: Value): void {
-    const { instance } = this;
-    instance.updateSettings({ height: 'auto' });
-    instance.loadData(deepCopy(value));
-    instance.validateRows([...range(0, value.length)]);
-    this.hackyRenderSecondRun();
-  }
-
-  @Watch('staticConfig') watchConfig (config: GridSettings): void {
-    this.instance.updateSettings(config);
-  }
-
-  fillIn (data: Map<number, Map<K, T[K]>>): void {
-    const { instance } = this;
-
-    const changes: [number, string, unknown][] = [];
-    for (const [row, props] of data) {
-      for (const [prop, val] of props) {
-        changes.push([instance.toVisualRow(row), prop as string, val]);
-      }
-    }
-
-    instance.setDataAtRowProp(changes, FILLIN);
-  }
-}
+});
 </script>
 
 <style lang="stylus" scoped>
